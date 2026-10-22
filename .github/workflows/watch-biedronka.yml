@@ -1,0 +1,69 @@
+name: Obserwuj gazetkę Biedronki
+
+on:
+  schedule:
+    # Codzienne sprawdzenie; GitHub Actions uruchamia harmonogram w UTC.
+    - cron: '20 5 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Wymuś ponowny OCR tej samej gazetki"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: watcher-biedronka
+  cancel-in-progress: false
+
+jobs:
+  monitoruj-i-konwertuj:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Ustaw Pythona
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Zainstaluj OCR i biblioteki
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-pol tesseract-ocr-eng
+          python -m pip install --upgrade pip
+          python -m pip install requests beautifulsoup4 pymupdf pillow pytesseract openpyxl
+
+      - name: Sprawdź nową gazetkę i utwórz Excel
+        id: convert
+        env:
+          FORCE_PROCESS: ${{ inputs.force }}
+        run: python scripts/watch_biedronka.py
+
+      - name: Udostępnij Excel i źródłowy PDF
+        if: steps.convert.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: biedronka-gazetka-excel-${{ github.run_number }}
+          path: |
+            output/*.xlsx
+            output/*.pdf
+            output/source.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Zapisz odcisk ostatniej gazetki
+        if: steps.convert.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .state/biedronka.json
+          git diff --cached --quiet || git commit -m "Zapisz stan obserwatora gazetki Biedronki"
+          git push

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f3">
+  <title>Gazetki → Excel</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Gazetki do Excela — strona główna"><span class="brand-mark">g.</span><span>gazetki <b>→ excel</b></span></a>
+    <span class="privacy"><span class="lock">◈</span> Pliki przetwarzane w tej przeglądarce</span>
+  </header>
+  <main class="shell">
+    <section class="intro">
+      <div class="eyebrow">ANALIZA PROMOCJI SPOŻYWCZYCH</div>
+      <h1>Z gazetki prosto<br>do <em>arkusza.</em></h1>
+      <p>Dodaj PDF albo zdjęcie. Odczytane oferty sprawdzisz i poprawisz przed eksportem do Excela.</p>
+    </section>
+
+    <section class="panel upload-panel" aria-labelledby="upload-title">
+      <div class="panel-heading"><div><span class="step">01</span><h2 id="upload-title">Dodaj gazetki</h2></div><span class="muted">PDF, JPG, PNG, WEBP</span></div>
+      <label class="dropzone" id="dropzone" for="fileInput">
+        <input id="fileInput" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" multiple>
+        <span class="upload-icon" aria-hidden="true">↑</span>
+        <strong>Upuść pliki tutaj</strong>
+        <span class="muted">albo <span class="browse">wybierz z urządzenia</span></span>
+      </label>
+      <div class="settings-row">
+        <label class="field"><span>Sklep</span><input id="storeInput" type="text" placeholder="np. Lidl" autocomplete="organization"></label>
+        <label class="field"><span>Ważność do</span><input id="validToInput" type="date"></label>
+        <button class="button primary" id="processBtn" disabled>Odczytaj gazetki <span>↗</span></button>
+      </div>
+      <div class="file-list" id="fileList" aria-live="polite"></div>
+      <div class="progress-wrap" id="progressWrap" hidden><div class="progress-label"><span id="progressLabel">Przygotowanie…</span><span id="progressPct">0%</span></div><div class="progress-track"><div id="progressBar"></div></div></div>
+    </section>
+
+    <section class="panel results-panel" aria-labelledby="results-title">
+      <div class="panel-heading results-heading"><div><span class="step">02</span><h2 id="results-title">Sprawdź odczytane oferty</h2></div><div class="result-actions"><span class="count" id="rowCount">0 ofert</span><button id="addRowBtn" class="button secondary">＋ Dodaj wiersz</button><button id="exportBtn" class="button primary" disabled>Eksportuj .xlsx <span>↓</span></button></div></div>
+      <p class="hint">OCR może pomylić cyfry lub nazwy. Przejrzyj tabelę przed eksportem. Cena jednostkowa wyliczy się automatycznie po podaniu masy lub pojemności.</p>
+      <div class="table-scroll"><table><thead><tr><th>Sklep</th><th>Produkt / opis</th><th>Kategoria</th><th>Cena promo</th><th>Cena regularna</th><th>Ilość</th><th>Cena / kg lub l</th><th>Warunki</th><th>Ważna do</th><th>Str.</th><th></th></tr></thead><tbody id="offersBody"><tr class="empty-row"><td colspan="11"><div class="empty-state"><span>↳</span><strong>Tu pojawią się oferty</strong><small>Dodaj gazetkę, aby rozpocząć analizę.</small></div></td></tr></tbody></table></div>
+      <div class="table-footer"><span id="statusText">Dane nie zostały jeszcze wczytane.</span><span>Możesz edytować każdą komórkę przed eksportem.</span></div>
+    </section>
+    <footer><span>Gazetki → Excel</span><span>Wersja 0.1 · Projekt otwarty</span></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" referrerpolicy="no-referrer"></script>
+  <script src="app.js"></script>
+</body>
+</html>
